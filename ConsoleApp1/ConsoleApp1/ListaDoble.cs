@@ -1,18 +1,7 @@
-﻿public class Nodo<T>
-{
-    public T Dato { get; set; }
-    public Nodo<T> Siguiente { get; set; }
-    public Nodo<T> Anterior { get; set; }
+﻿using System;
+using System.Collections.Generic;
 
-    public Nodo(T valor)
-    {
-        Dato = valor;
-        Siguiente = null;
-        Anterior = null;
-    }
-}
-
-public class ListaDoble<T>
+public class ListaDoble<T> where T : IComparable<T>
 {
     private Nodo<T> cabeza;
     private Nodo<T> cola;
@@ -59,138 +48,148 @@ public class ListaDoble<T>
         }
         Console.WriteLine("null");
     }
-}
-bool existe(T valor)
-{
-    Nodo<T>* actual = cabeza;
-    while (actual)
-    {
-        if (actual->dato == valor) return true;
-        actual = actual->siguiente;
-    }
-    return false;
-}
 
-void eliminarUna(T valor)
-{
-    Nodo<T>* actual = cabeza;
-    while (actual)
+    public bool Existe(T valor)
     {
-        if (actual->dato == valor)
+        var actual = cabeza;
+        while (actual != null)
         {
-            if (actual->anterior) actual->anterior->siguiente = actual->siguiente;
-            else cabeza = actual->siguiente;
-
-            if (actual->siguiente) actual->siguiente->anterior = actual->anterior;
-            else cola = actual->anterior;
-
-            delete actual;
-            break;
+            if (EqualityComparer<T>.Default.Equals(actual.Dato, valor))
+                return true;
+            actual = actual.Siguiente;
         }
-        actual = actual->siguiente;
+        return false;
     }
-}
 
-void eliminarTodas(Task valor)
-{
-    Nodo<T>* actual = cabeza;
-    while (actual)
+    public void EliminarUna(T valor)
     {
-        Nodo<T>* siguiente = actual->siguiente;
-
-        if (actual->dato == valor)
+        var actual = cabeza;
+        while (actual != null)
         {
-            if (actual->anterior) actual->anterior->siguiente = actual->siguiente;
-            else cabeza - actual->siguiente;
-
-            if (actual->siguiente) actual->siguiente->anterior - actual->anterior;
-            else cola - actual->anterior;
-
-
-            delete actual;
-
-        }
-        else
-        {
-            actual - siguiente;
-        }
-    }
-}
-
-void mostrarModa()
-{
-    map<T, int> frecuencia;
-    Nodo<T>* actual = cabeza;
-    while (actual)
-    {
-        frecuencia[actual->dato]++;
-        actual = actual->siguiente;
-    }
-
-    int maxFrecuencia = 0;
-    for (auto & par : frecuencia) {
-            if (par.second > maxFrecuencia)
-                maxFrecuencia = par.second;
-        }
-
-        cout << "Moda(s): ";
-for (auto & par : frecuencia)
-{
-    if (par.second == maxFrecuencia)
-        cout << par.first << " ";
-}
-cout << endl;
-    }
-
-    void mostrarGrafico()
-{
-    map<T, int> frecuencia;
-    Nodo<T>* actual = cabeza;
-    while (actual)
-    {
-        frecuencia[actual->dato]++;
-        actual = actual->siguiente;
-    }
-
-    for (auto & par : frecuencia) {
-            cout << par.first << " ";
-for (int i = 0; i < par.second; i++)
-{
-    cout << "*";
-}
-cout << endl;
-        }
-    }
-
-    void ordenarAscendente()
-{
-    if (!cabeza || !cabeza->siguiente) return;
-
-    for (Nodo<T>* i = cabeza; i != nullptr; i = i->siguiente)
-    {
-        for (Nodo<T>* j = i->siguiente; j != nullptr; j = j->siguiente)
-        {
-            if (j->dato < i->dato)
+            if (EqualityComparer<T>.Default.Equals(actual.Dato, valor))
             {
-                swap(i->dato, j->dato);
+                if (actual.Anterior != null)
+                    actual.Anterior.Siguiente = actual.Siguiente;
+                else
+                    cabeza = actual.Siguiente;
+
+                if (actual.Siguiente != null)
+                    actual.Siguiente.Anterior = actual.Anterior;
+                else
+                    cola = actual.Anterior;
+
+                break;
+            }
+            actual = actual.Siguiente;
+        }
+    }
+
+    public void EliminarTodas(T valor)
+    {
+        var actual = cabeza;
+        while (actual != null)
+        {
+            var siguiente = actual.Siguiente;
+            if (EqualityComparer<T>.Default.Equals(actual.Dato, valor))
+            {
+                if (actual.Anterior != null)
+                    actual.Anterior.Siguiente = actual.Siguiente;
+                else
+                    cabeza = actual.Siguiente;
+
+                if (actual.Siguiente != null)
+                    actual.Siguiente.Anterior = actual.Anterior;
+                else
+                    cola = actual.Anterior;
+            }
+            actual = siguiente;
+        }
+    }
+
+    public void MostrarModa()
+    {
+        var frecuencia = new Dictionary<T, int>();
+        var actual = cabeza;
+        while (actual != null)
+        {
+            if (frecuencia.ContainsKey(actual.Dato))
+                frecuencia[actual.Dato]++;
+            else
+                frecuencia[actual.Dato] = 1;
+            actual = actual.Siguiente;
+        }
+
+        int maxFrecuencia = 0;
+        foreach (var par in frecuencia)
+        {
+            if (par.Value > maxFrecuencia)
+                maxFrecuencia = par.Value;
+        }
+
+        Console.Write("Moda(s): ");
+        foreach (var par in frecuencia)
+        {
+            if (par.Value == maxFrecuencia)
+                Console.Write($"{par.Key} ");
+        }
+        Console.WriteLine();
+    }
+
+    public void MostrarGrafico()
+    {
+        var frecuencia = new Dictionary<T, int>();
+        var actual = cabeza;
+        while (actual != null)
+        {
+            if (frecuencia.ContainsKey(actual.Dato))
+                frecuencia[actual.Dato]++;
+            else
+                frecuencia[actual.Dato] = 1;
+            actual = actual.Siguiente;
+        }
+
+        foreach (var par in frecuencia)
+        {
+            Console.Write($"{par.Key} ");
+            for (int i = 0; i < par.Value; i++)
+                Console.Write("*");
+            Console.WriteLine();
+        }
+    }
+
+    public void OrdenarAscendente()
+    {
+        if (cabeza == null || cabeza.Siguiente == null) return;
+
+        for (var i = cabeza; i != null; i = i.Siguiente)
+        {
+            for (var j = i.Siguiente; j != null; j = j.Siguiente)
+            {
+                if (j.Dato.CompareTo(i.Dato) < 0)
+                {
+                    var temp = i.Dato;
+                    i.Dato = j.Dato;
+                    j.Dato = temp;
+                }
             }
         }
     }
-}
 
-void ordenarDescendente()
-{
-    if (!cabeza || !cabeza->siguiente) return;
-
-    for (Nodo<T>* i = cabeza; i != nullptr; i = i->siguiente)
+    public void OrdenarDescendente()
     {
-        for (Nodo<T>* j = i->siguiente; j != nullptr; j = j->siguiente)
+        if (cabeza == null || cabeza.Siguiente == null) return;
+
+        for (var i = cabeza; i != null; i = i.Siguiente)
         {
-            if (j->dato > i->dato)
+            for (var j = i.Siguiente; j != null; j = j.Siguiente)
             {
-                swap(i->dato, j->dato);
+                if (j.Dato.CompareTo(i.Dato) > 0)
+                {
+                    var temp = i.Dato;
+                    i.Dato = j.Dato;
+                    j.Dato = temp;
+                }
             }
         }
     }
-}
 }
